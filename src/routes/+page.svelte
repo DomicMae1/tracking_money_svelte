@@ -7,7 +7,7 @@
 	import Filter from '$lib/components/Filter.svelte';
 
 	// Alamat base URL untuk API Go kita
-	const API_URL = 'http://localhost:8080/api/transactions/';
+	const API_URL = 'https://tracking-money-go-iirm.vercel.app/api/transactions/';
 
 	// State utama sekarang dimulai dengan array kosong
 	let transactions = [];
@@ -75,7 +75,7 @@
 		const idToDelete = event.detail;
 
 		try {
-			const response = await fetch(`${API_URL}/${idToDelete}`, {
+			const response = await fetch(`${API_URL}${idToDelete}`, {
 				method: 'DELETE'
 			});
 
