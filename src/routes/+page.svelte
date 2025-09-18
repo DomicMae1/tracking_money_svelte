@@ -2,111 +2,115 @@
 	// @ts-nocheck
 
 	import { onMount } from 'svelte';
-	import ExpenseForm from '$lib/components/ExpenseForm.svelte';
-	import ExpenseList from '$lib/components/ExpenseList.svelte';
+	// 1. Menggunakan nama komponen yang baru
+	import TransactionForm from '$lib/components/TransactionForm.svelte';
+	import TransactionList from '$lib/components/TransactionList.svelte';
 	import Filter from '$lib/components/Filter.svelte';
+	// 2. Mengimpor komponen Summary yang baru
+	import Summary from '$lib/components/Summary.svelte';
 
-	// Alamat base URL untuk API Go kita
-	const API_URL = 'https://tracking-money-go-iirm.vercel.app/api/transactions/';
+	// PASTIKAN URL INI SESUAI DENGAN DEPLOYMENT BACKEND ANDA
+	const API_BASE_URL = 'https://tracking-money-go-iirm.vercel.app/api';
 
-	// State utama sekarang dimulai dengan array kosong
+	// State untuk daftar transaksi
 	let transactions = [];
+	// State BARU untuk data ringkasan
+	let summary = {};
 
-	// State untuk filter, tidak berubah
 	let currentFilter = {
 		year: new Date().getFullYear(),
 		month: 'all'
 	};
 
-	// --- FUNGSI UNTUK BERKOMUNIKASI DENGAN API ---
+	// --- FUNGSI API YANG DIPERBARUI ---
 
-	// 1. Mengambil data dari backend
+	// Fungsi helper untuk mengambil semua data (transaksi dan summary)
+	async function fetchAllData(filter) {
+		// Jalankan kedua fetch secara bersamaan untuk efisiensi
+		await Promise.all([fetchTransactions(filter), fetchSummary(filter)]);
+	}
+
+	// Mengambil daftar transaksi
 	async function fetchTransactions(filter) {
-		let url = `${API_URL}?year=${filter.year}`;
-		if (filter.month !== 'all') {
-			url += `&month=${filter.month}`;
-		}
-
+		const params = new URLSearchParams({ year: filter.year });
+		if (filter.month !== 'all') params.append('month', filter.month);
 		try {
-			const response = await fetch(url);
-			if (!response.ok) throw new Error('Gagal mengambil data');
+			const response = await fetch(`${API_BASE_URL}/transactions?${params.toString()}`);
+			if (!response.ok) throw new Error('Gagal mengambil transaksi');
 			transactions = (await response.json()) || [];
 		} catch (error) {
-			console.error('Error fetching transactions:', error);
-			alert('Tidak bisa terhubung ke server backend.');
+			console.error(error);
+			alert('Gagal terhubung ke server untuk mengambil transaksi.');
 		}
 	}
 
-	// 2. Menambah data baru (POST)
+	// Fungsi BARU untuk mengambil data ringkasan
+	async function fetchSummary(filter) {
+		const params = new URLSearchParams({ year: filter.year });
+		if (filter.month !== 'all') params.append('month', filter.month);
+		try {
+			const response = await fetch(`${API_BASE_URL}/summary?${params.toString()}`);
+			if (!response.ok) throw new Error('Gagal mengambil summary');
+			summary = (await response.json()) || {};
+		} catch (error) {
+			console.error(error);
+		}
+	}
+
+	// Menambah data baru, sekarang me-refresh semua data
 	async function handleNewTransaction(event) {
 		const newTransactionData = event.detail;
-
 		try {
-			const response = await fetch(API_URL, {
+			await fetch(`${API_BASE_URL}/transactions`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(newTransactionData)
 			});
-
-			if (!response.ok) throw new Error('Gagal menambah data');
-
-			const createdTransaction = await response.json();
-
-			// === PERBAIKAN DI SINI ===
-			// 1. Ambil tanggal dari data yang baru dibuat
-			const transactionDate = new Date(createdTransaction.date);
-
-			// 2. Update filter agar cocok dengan data baru
-			currentFilter = {
-				year: transactionDate.getFullYear(),
-				month: ('0' + (transactionDate.getMonth() + 1)).slice(-2)
-			};
-
-			// 3. Ambil data dari server DENGAN filter yang sudah diupdate
-			// Ini akan menjamin data baru pasti tampil
-			await fetchTransactions(currentFilter);
+			// Panggil helper untuk me-refresh transaksi DAN summary
+			await fetchAllData(currentFilter);
 		} catch (error) {
 			console.error('Error adding transaction:', error);
 		}
 	}
 
-	// 3. Menghapus data (DELETE)
+	// Menghapus data, sekarang me-refresh semua data
 	async function handleDeleteTransaction(event) {
 		const idToDelete = event.detail;
-
 		try {
-			const response = await fetch(`${API_URL}${idToDelete}`, {
-				method: 'DELETE'
-			});
-
-			if (!response.ok) throw new Error('Gagal menghapus data');
-
-			await fetchTransactions(currentFilter);
+			await fetch(`${API_BASE_URL}/transactions/${idToDelete}`, { method: 'DELETE' });
+			// Panggil helper untuk me-refresh transaksi DAN summary
+			await fetchAllData(currentFilter);
 		} catch (error) {
 			console.error('Error deleting transaction:', error);
 		}
 	}
 
-	// 4. Menangani perubahan filter
+	// Mengubah filter, sekarang me-refresh semua data
 	function handleFilterChange(event) {
 		currentFilter = event.detail;
-		fetchTransactions(currentFilter);
+		fetchAllData(currentFilter);
 	}
 
-	// onMount dijalankan sekali saat komponen pertama kali dimuat
+	// onMount sekarang memanggil helper untuk mengambil semua data awal
 	onMount(() => {
-		fetchTransactions(currentFilter);
+		fetchAllData(currentFilter);
 	});
 </script>
 
 <main>
-	<h1>Pelacak Pengeluaran</h1>
+	<!-- Judul diubah -->
+	<h1>Manajer Keuangan</h1>
 
-	<ExpenseForm on:addTransaction={handleNewTransaction} />
+	<!-- Komponen Summary BARU ditambahkan di sini -->
+	<Summary {summary} />
+
+	<!-- Menggunakan nama komponen yang baru -->
+	<TransactionForm on:addTransaction={handleNewTransaction} />
 
 	<Filter on:filterChange={handleFilterChange} />
 
-	<ExpenseList {transactions} on:deleteTransaction={handleDeleteTransaction} />
+	<!-- Menggunakan nama komponen yang baru -->
+	<TransactionList {transactions} on:deleteTransaction={handleDeleteTransaction} />
 </main>
 
 <style>
@@ -116,10 +120,10 @@
 		max-width: 800px;
 		margin: 0 auto;
 	}
-
 	h1 {
 		color: #333;
 		font-size: 2.5rem;
 		font-weight: 700;
+		margin-bottom: 0;
 	}
 </style>

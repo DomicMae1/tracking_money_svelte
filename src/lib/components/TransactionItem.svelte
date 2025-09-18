@@ -2,13 +2,11 @@
 	// @ts-nocheck
 
 	import { createEventDispatcher } from 'svelte';
-
 	const dispatch = createEventDispatcher();
 
-	// Komponen ini menerima satu objek 'transaction' dari induknya (ExpenseList)
+	// Komponen ini sekarang menerima transaksi yang bisa berupa 'income' atau 'expense'
 	export let transaction;
 
-	// Fungsi untuk memformat angka menjadi format Rupiah
 	function formatCurrency(value) {
 		return new Intl.NumberFormat('id-ID', {
 			style: 'currency',
@@ -17,13 +15,14 @@
 		}).format(value);
 	}
 
-	// Saat tombol hapus diklik, kirim event ke induk beserta ID transaksi ini
 	function handleDelete() {
 		dispatch('deleteTransaction', transaction.id);
 	}
 </script>
 
-<div class="expense-item">
+<!-- Menggunakan class:income untuk styling kondisional -->
+<!-- Jika transaction.type adalah 'income', Svelte akan otomatis menambahkan class "income" -->
+<div class="transaction-item" class:income={transaction.type === 'income'}>
 	<div class="info">
 		<span class="description">{transaction.description}</span>
 		<span class="date">{transaction.date}</span>
@@ -35,15 +34,27 @@
 </div>
 
 <style>
-	.expense-item {
+	.transaction-item {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 		padding: 1rem;
 		background-color: #fff;
-		border: 1px solid #e9ecef;
+		/* Merah (pengeluaran) sebagai default */
+		border-left: 5px solid #dc3545;
 		border-radius: 6px;
 		margin-bottom: 0.75rem;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+	}
+
+	/* === PERUBAHAN UTAMA DI SINI === */
+	/* Jika item memiliki class 'income', ganti warna border dan jumlahnya */
+	.transaction-item.income {
+		border-left-color: #198754; /* Hijau */
+	}
+
+	.transaction-item.income .amount {
+		color: #198754; /* Hijau */
 	}
 
 	.info {
@@ -51,41 +62,35 @@
 		flex-direction: column;
 		gap: 0.25rem;
 	}
-
 	.description {
 		font-weight: 600;
 		font-size: 1.1rem;
 		color: #212529;
 	}
-
 	.date {
 		font-size: 0.85rem;
 		color: #6c757d;
 	}
-
 	.amount-action {
 		display: flex;
 		align-items: center;
 		gap: 1rem;
 	}
-
 	.amount {
 		font-weight: bold;
-		color: #dc3545; /* Merah untuk pengeluaran */
+		color: #dc3545; /* Default-nya merah */
 		font-size: 1.1rem;
 	}
-
 	.delete-btn {
 		border: none;
-		background-color: #dc3545;
+		background-color: #6c757d; /* Warna lebih netral */
 		color: white;
 		padding: 0.5rem 0.75rem;
 		border-radius: 4px;
 		cursor: pointer;
 		font-size: 0.8rem;
 	}
-
 	.delete-btn:hover {
-		background-color: #c82333;
+		background-color: #5c636a;
 	}
 </style>

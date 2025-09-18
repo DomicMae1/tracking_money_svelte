@@ -1,36 +1,40 @@
 <script>
-// @ts-nocheck
+	// @ts-nocheck
 
-	import ExpenseItem from '$lib/components/ExpenseItem.svelte';
+	// Mengimpor nama komponen yang baru dan benar
+	import TransactionItem from '$lib/components/TransactionItem.svelte';
 	import { createEventDispatcher } from 'svelte';
 
 	const dispatch = createEventDispatcher();
 
-	// Menerima array 'transactions' dari komponen induknya (+page.svelte)
 	export let transactions = [];
 
-	// Fungsi untuk meneruskan event 'deleteTransaction' dari ExpenseItem ke +page.svelte
 	function forwardDelete(event) {
 		dispatch('deleteTransaction', event.detail);
 	}
 </script>
 
-<div class="expense-list-container">
-	<h2>Daftar Pengeluaran</h2>
+<!-- Nama class diubah agar lebih generik -->
+<div class="transaction-list-container">
+	<!-- Judul diubah -->
+	<h2>Riwayat Transaksi</h2>
 
 	{#if transactions.length === 0}
-		<p class="empty-message">Belum ada data pengeluaran. Silakan tambahkan!</p>
+		<!-- Pesan diubah agar lebih sesuai -->
+		<p class="empty-message">Belum ada data transaksi untuk periode ini.</p>
 	{:else}
 		<div class="list">
 			{#each transactions as transaction (transaction.id)}
-				<ExpenseItem {transaction} on:deleteTransaction={forwardDelete} />
+				<!-- Menggunakan komponen yang baru dan benar -->
+				<TransactionItem {transaction} on:deleteTransaction={forwardDelete} />
 			{/each}
 		</div>
 	{/if}
 </div>
 
 <style>
-	.expense-list-container {
+	/* Nama class diubah agar lebih generik */
+	.transaction-list-container {
 		width: 100%;
 		max-width: 500px;
 		margin: 2rem auto;
