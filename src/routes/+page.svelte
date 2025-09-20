@@ -10,7 +10,7 @@
 	import Summary from '$lib/components/Summary.svelte';
 
 	// PASTIKAN URL INI SESUAI DENGAN DEPLOYMENT BACKEND ANDA
-	const API_BASE_URL = 'https://tracking-money-go-iirm.vercel.app/api';
+	const API_BASE_URL = 'https://tracking-money-go.vercel.app/api';
 
 	// State untuk daftar transaksi
 	let transactions = [];
@@ -26,10 +26,12 @@
 
 	// Fungsi helper untuk mengambil semua data (transaksi dan summary)
 	async function fetchAllData(filter) {
-		// Jalankan kedua fetch secara bersamaan untuk efisiensi
-		await Promise.all([fetchTransactions(filter), fetchSummary(filter)]);
+		await Promise.all([
+			fetchTransactions(filter),
+			fetchSummary(filter),
+			fetchMonthlySummary(filter)
+		]);
 	}
-
 	// Mengambil daftar transaksi
 	async function fetchTransactions(filter) {
 		const params = new URLSearchParams({ year: filter.year });
