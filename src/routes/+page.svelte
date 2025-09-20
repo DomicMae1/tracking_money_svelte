@@ -8,6 +8,7 @@
 	import Filter from '$lib/components/Filter.svelte';
 	// 2. Mengimpor komponen Summary yang baru
 	import Summary from '$lib/components/Summary.svelte';
+	import MonthlyChart from '$lib/components/MonthlyChart.svelte'; // Impor komponen baru
 
 	// PASTIKAN URL INI SESUAI DENGAN DEPLOYMENT BACKEND ANDA
 	const API_BASE_URL = 'https://tracking-money-go.vercel.app/api';
@@ -16,6 +17,7 @@
 	let transactions = [];
 	// State BARU untuk data ringkasan
 	let summary = {};
+	let monthlySummary = [];
 
 	let currentFilter = {
 		year: new Date().getFullYear(),
@@ -54,6 +56,18 @@
 			const response = await fetch(`${API_BASE_URL}/summary?${params.toString()}`);
 			if (!response.ok) throw new Error('Gagal mengambil summary');
 			summary = (await response.json()) || {};
+		} catch (error) {
+			console.error(error);
+		}
+	}
+
+	async function fetchMonthlySummary(filter) {
+		const params = new URLSearchParams({ year: filter.year });
+		if (filter.month !== 'all') params.append('month', filter.month); // ✅ sudah benar
+		try {
+			const response = await fetch(`${API_BASE_URL}/monthly-summary?${params.toString()}`);
+			if (!response.ok) throw new Error('Gagal mengambil summary bulanan');
+			monthlySummary = (await response.json()) || [];
 		} catch (error) {
 			console.error(error);
 		}
@@ -105,6 +119,8 @@
 
 	<!-- Komponen Summary BARU ditambahkan di sini -->
 	<Summary {summary} />
+
+	<MonthlyChart {monthlySummary} />
 
 	<!-- Menggunakan nama komponen yang baru -->
 	<TransactionForm on:addTransaction={handleNewTransaction} />
