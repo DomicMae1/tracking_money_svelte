@@ -44,7 +44,7 @@
 		/* Membuat layout kolom yang responsif */
 		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 		gap: 1rem;
-		max-width: 500px;
+		max-width: 900px;
 		margin: 2rem auto;
 	}
 

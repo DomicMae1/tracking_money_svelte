@@ -79,7 +79,7 @@
 		border-radius: 12px;
 		background-color: #f8f9fa;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-		max-width: 500px;
+		max-width: 900px;
 		margin: 2rem auto;
 	}
 	.type-selector {

@@ -36,7 +36,7 @@
 	/* Nama class diubah agar lebih generik */
 	.transaction-list-container {
 		width: 100%;
-		max-width: 500px;
+		max-width: 900px;
 		margin: 2rem auto;
 	}
 

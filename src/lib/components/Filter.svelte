@@ -66,14 +66,14 @@
 		padding: 1rem;
 		background-color: #e9ecef;
 		border-radius: 6px;
-		max-width: 500px;
+		max-width: 900px;
 		margin: 1rem auto 2rem auto;
 	}
 
 	.filter-control {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.75rem;
 	}
 
 	label {
@@ -81,7 +81,6 @@
 	}
 
 	select {
-		padding: 0.5rem;
 		border-radius: 4px;
 		border: 1px solid #ccc;
 	}
