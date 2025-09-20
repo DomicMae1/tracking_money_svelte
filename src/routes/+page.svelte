@@ -3,6 +3,7 @@
 
 	import { onMount } from 'svelte';
 	// 1. Menggunakan nama komponen yang baru
+	import Logout from '$lib/components/Logout.svelte';
 	import TransactionForm from '$lib/components/TransactionForm.svelte';
 	import TransactionList from '$lib/components/TransactionList.svelte';
 	import Filter from '$lib/components/Filter.svelte';
@@ -24,10 +25,19 @@
 		month: 'all'
 	};
 
+	let token = null; // ❗ awalnya null
+
+	function getCookie(name) {
+		if (typeof document === 'undefined') return null; // aman untuk SSR
+		const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+		return match ? match[2] : null;
+	}
+
 	// --- FUNGSI API YANG DIPERBARUI ---
 
 	// Fungsi helper untuk mengambil semua data (transaksi dan summary)
 	async function fetchAllData(filter) {
+		if (!token) return;
 		await Promise.all([
 			fetchTransactions(filter),
 			fetchSummary(filter),
@@ -39,7 +49,9 @@
 		const params = new URLSearchParams({ year: filter.year });
 		if (filter.month !== 'all') params.append('month', filter.month);
 		try {
-			const response = await fetch(`${API_BASE_URL}/transactions?${params.toString()}`);
+			const response = await fetch(`${API_BASE_URL}/transactions?${params.toString()}`, {
+				headers: { Authorization: `Bearer ${token}` }
+			});
 			if (!response.ok) throw new Error('Gagal mengambil transaksi');
 			transactions = (await response.json()) || [];
 		} catch (error) {
@@ -53,7 +65,9 @@
 		const params = new URLSearchParams({ year: filter.year });
 		if (filter.month !== 'all') params.append('month', filter.month);
 		try {
-			const response = await fetch(`${API_BASE_URL}/summary?${params.toString()}`);
+			const response = await fetch(`${API_BASE_URL}/summary?${params.toString()}`, {
+				headers: { Authorization: `Bearer ${token}` }
+			});
 			if (!response.ok) throw new Error('Gagal mengambil summary');
 			summary = (await response.json()) || {};
 		} catch (error) {
@@ -65,7 +79,9 @@
 		const params = new URLSearchParams({ year: filter.year });
 		if (filter.month !== 'all') params.append('month', filter.month); // ✅ sudah benar
 		try {
-			const response = await fetch(`${API_BASE_URL}/monthly-summary?${params.toString()}`);
+			const response = await fetch(`${API_BASE_URL}/monthly-summary?${params.toString()}`, {
+				headers: { Authorization: `Bearer ${token}` }
+			});
 			if (!response.ok) throw new Error('Gagal mengambil summary bulanan');
 			monthlySummary = (await response.json()) || [];
 		} catch (error) {
@@ -79,7 +95,7 @@
 		try {
 			await fetch(`${API_BASE_URL}/transactions`, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
 				body: JSON.stringify(newTransactionData)
 			});
 			// Panggil helper untuk me-refresh transaksi DAN summary
@@ -93,7 +109,11 @@
 	async function handleDeleteTransaction(event) {
 		const idToDelete = event.detail;
 		try {
-			await fetch(`${API_BASE_URL}/transactions/${idToDelete}`, { method: 'DELETE' });
+			await fetch(`${API_BASE_URL}/transactions/${idToDelete}`, {
+				method: 'DELETE',
+				headers: { Authorization: `Bearer ${token}` }
+			});
+
 			// Panggil helper untuk me-refresh transaksi DAN summary
 			await fetchAllData(currentFilter);
 		} catch (error) {
@@ -109,13 +129,20 @@
 
 	// onMount sekarang memanggil helper untuk mengambil semua data awal
 	onMount(() => {
-		fetchAllData(currentFilter);
+		token = getCookie('token'); // ✅ token hanya diambil di client
+		if (!token) {
+			window.location.href = '/login'; // redirect kalau belum login
+		} else {
+			fetchAllData(currentFilter);
+		}
 	});
 </script>
 
 <main>
 	<!-- Judul diubah -->
 	<h1>Manajer Keuangan</h1>
+
+	<Logout />
 
 	<!-- Komponen Summary BARU ditambahkan di sini -->
 	<Summary {summary} />
