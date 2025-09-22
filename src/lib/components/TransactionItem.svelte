@@ -15,8 +15,27 @@
 		}).format(value);
 	}
 
+	function formatDate(dateString) {
+		// Convert "2025-10-09" ke objek Date
+		const date = new Date(dateString);
+		// Format ke "09 September 2025"
+		return date.toLocaleDateString('id-ID', {
+			day: '2-digit',
+			month: 'long',
+			year: 'numeric'
+		});
+	}
+
 	function handleDelete() {
 		dispatch('deleteTransaction', transaction.id);
+	}
+
+	function handleNote() {
+		dispatch('addNote', {
+			description: transaction.description,
+			amount: transaction.amount,
+			date: transaction.date
+		});
 	}
 </script>
 
@@ -25,10 +44,11 @@
 <div class="transaction-item" class:income={transaction.type === 'income'}>
 	<div class="info">
 		<span class="description">{transaction.description}</span>
-		<span class="date">{transaction.date}</span>
+		<span class="date">{formatDate(transaction.date)}</span>
 	</div>
 	<div class="amount-action">
 		<span class="amount">{formatCurrency(transaction.amount)}</span>
+		<button class="note-btn" on:click={handleNote}>Note</button>
 		<button class="delete-btn" on:click={handleDelete}>Hapus</button>
 	</div>
 </div>
@@ -61,6 +81,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
+		align-items: start;
 	}
 	.description {
 		font-weight: 600;
@@ -83,14 +104,61 @@
 	}
 	.delete-btn {
 		border: none;
-		background-color: #6c757d; /* Warna lebih netral */
+		background-color: red; /* Warna lebih netral */
 		color: white;
 		padding: 0.5rem 0.75rem;
 		border-radius: 4px;
 		cursor: pointer;
 		font-size: 0.8rem;
 	}
-	.delete-btn:hover {
-		background-color: #5c636a;
+	.note-btn {
+		border: none;
+		background-color: yellowgreen; /* Warna lebih netral */
+		color: white;
+		padding: 0.5rem 0.75rem;
+		border-radius: 4px;
+		cursor: pointer;
+		font-size: 0.8rem;
+	}
+
+	/* 📱 Mobile */
+	@media (max-width: 640px) {
+		.transaction-item {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+
+		.amount-action {
+			width: 100%;
+			justify-content: space-between;
+			margin-top: 0.5rem;
+		}
+
+		.amount {
+			font-size: 1rem;
+		}
+
+		.delete-btn,
+		.note-btn {
+			flex: 1;
+			text-align: center;
+		}
+	}
+
+	/* 📲 Tablet */
+	@media (min-width: 641px) and (max-width: 1024px) {
+		.transaction-item {
+			padding: 0.75rem;
+		}
+
+		.description {
+			font-size: 1rem;
+		}
+		.amount {
+			font-size: 1rem;
+		}
+		.amount-action {
+			gap: 0.5rem;
+		}
 	}
 </style>
