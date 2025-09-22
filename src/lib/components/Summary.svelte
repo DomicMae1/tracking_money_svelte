@@ -50,7 +50,8 @@
 
 	.card {
 		background: #fff;
-		padding: 1.5rem;
+		padding-top: 1rem;
+		padding-bottom: 1rem;
 		border-radius: 8px;
 		text-align: center;
 		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
