@@ -20,7 +20,7 @@
 <!-- Nama class diubah agar lebih generik -->
 <div class="transaction-list-container">
 	<!-- Judul diubah -->
-	<h2>Riwayat Transaksi</h2>
+	<h2 class="font-bold">Riwayat Transaksi</h2>
 
 	{#if transactions.length === 0}
 		<!-- Pesan diubah agar lebih sesuai -->
