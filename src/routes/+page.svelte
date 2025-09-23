@@ -180,6 +180,22 @@
 		on:deleteTransaction={handleDeleteTransaction}
 		on:addNote={handleAddNote}
 	/>
+
+	<div class="notes-container">
+		{#each notes as note, i}
+			<div class="note-item">
+				<b>{note.description}</b>
+				<br />
+				{new Intl.NumberFormat('id-ID', {
+					style: 'currency',
+					currency: 'IDR',
+					minimumFractionDigits: 0
+				}).format(note.amount)}
+				<br />
+				<small>{new Date(note.date).toLocaleDateString('id-ID')}</small>
+			</div>
+		{/each}
+	</div>
 </main>
 
 <div class="lg:hidden">
@@ -213,22 +229,6 @@
 			</SidebarFooter>
 		</Sidebar>
 	</SidebarProvider>
-</div>
-
-<div class="notes-container">
-	{#each notes as note, i}
-		<div class="note-item">
-			<b>{note.description}</b>
-			<br />
-			{new Intl.NumberFormat('id-ID', {
-				style: 'currency',
-				currency: 'IDR',
-				minimumFractionDigits: 0
-			}).format(note.amount)}
-			<br />
-			<small>{new Date(note.date).toLocaleDateString('id-ID')}</small>
-		</div>
-	{/each}
 </div>
 
 <style>
